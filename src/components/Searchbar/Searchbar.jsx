@@ -1,32 +1,29 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import styles from './Searchbar.module.css';
 
-export class Searchbar extends Component {
-  state = {
-    query: '',
+export const Searchbar = ({ onSubmit }) => {
+  const [query, setQuery] = useState('');
+
+  const onSearchChange = e => {
+    setQuery(e.target.value);
   };
-  onSearchChange = e => {
-    this.setState({ query: e.target.value });
-  };
-  onSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault();
-    console.log(this.props);
-    this.props.onSubmit(this.state.query);
+    onSubmit(query);
   };
-  render() {
-    return (
-      <div className={styles.Searchbar}>
-        <form onSubmit={this.onSubmit} className={styles.SearchForm}>
-          <input
-            type="text"
-            value={this.state.query}
-            onChange={this.onSearchChange}
-            className={styles.SearchFormInput}
-            placeholder="Search images..."
-          />
-          <button className={styles.SearchFormButton}>Search</button>
-        </form>
-      </div>
-    );
-  }
-}
+
+  return (
+    <div className={styles.Searchbar}>
+      <form onSubmit={handleSubmit} className={styles.SearchForm}>
+        <input
+          type="text"
+          value={query}
+          onChange={onSearchChange}
+          className={styles.SearchFormInput}
+          placeholder="Search images..."
+        />
+        <button className={styles.SearchFormButton}>Search</button>
+      </form>
+    </div>
+  );
+};
