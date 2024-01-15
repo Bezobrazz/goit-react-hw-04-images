@@ -1,77 +1,71 @@
-import React, { Component } from 'react';
-import { Searchbar } from './Searchbar/Searchbar';
+import React, { useState, useEffect } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
+import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
 import { loadPhotos } from 'helpers/Api';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import Modal from './Modal/Modal';
 import styles from './App.module.css';
 
-class App extends Component {
-  state = {
-    search: '',
-    images: [],
-    page: 1,
-    isLoadMore: false,
-    isLoading: false,
-    largeImgUrl: '',
-  };
+const App = () => {
+  const [search, setSearch] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [isLoadMore, setIsLoadMore] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [largeImgUrl, setLargeImgUrl] = useState('');
 
-  async componentDidUpdate(_, prevState) {
-    if (
-      prevState.search !== this.state.search ||
-      prevState.page !== this.state.page
-    ) {
-      const { search, page } = this.state;
-      this.setState({ isLoading: true });
-
+  useEffect(() => {
+    const fetchData = async () => {
       try {
+        setIsLoading(true);
         const { results, total } = await loadPhotos(search, page);
-
-        this.setState(prevState => ({
-          images: [...prevState.images, ...results],
-          isLoadMore: page < Math.ceil(total / 12),
-        }));
+        setImages(prevImages => [...prevImages, ...results]);
+        setIsLoadMore(page < Math.ceil(total / 12));
       } catch (error) {
         toast.error('Ooops, something went wrong 😭');
         console.error('Error fetching more images from Unsplash:', error);
       } finally {
-        this.setState({ isLoading: false });
+        setIsLoading(false);
       }
-    }
-  }
+    };
 
-  loadMoreImages = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+    fetchData();
+  }, [search, page]);
+
+  const loadMoreImages = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
-  onSubmit = query => {
-    this.setState({ search: query, page: 1, images: [] });
+  const onSubmit = query => {
+    setSearch(query);
+    setPage(1);
+    setImages([]);
   };
 
-  handleClickImg = url => {
-    this.setState({ largeImgUrl: url });
+  const handleClickImg = url => {
+    setLargeImgUrl(url);
   };
 
-  render() {
-    const { images, isLoading, isLoadMore, largeImgUrl } = this.state;
+  const closeModal = () => {
+    setLargeImgUrl('');
+  };
 
-    return (
-      <div className={styles.Wrapper}>
-        <ToastContainer />
-        <Searchbar onSubmit={this.onSubmit} />
-        <ImageGallery images={images} openModal={this.handleClickImg} />
-        {isLoading && <Loader />}
-        {isLoadMore && <Button loadMoreImages={this.loadMoreImages} />}
-        {largeImgUrl && (
-          <Modal closeModal={this.handleClickImg} largeImgUrl={largeImgUrl} />
-        )}
-      </div>
-    );
-  }
-}
+  return (
+    <div className={styles.Wrapper}>
+      <ToastContainer />
+      <Searchbar onSubmit={onSubmit} />
+      <ImageGallery images={images} openModal={handleClickImg} />
+      {isLoading && <Loader />}
+      {isLoadMore && <Button loadMoreImages={loadMoreImages} />}
+      {largeImgUrl && (
+        <Modal closeModal={closeModal} largeImgUrl={largeImgUrl} />
+      )}
+    </div>
+  );
+};
 
 export default App;
