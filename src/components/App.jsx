@@ -7,7 +7,7 @@ import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
 import { loadPhotos } from 'helpers/Api';
-import Modal from './Modal/Modal';
+import { Modal } from './Modal/Modal';
 import styles from './App.module.css';
 
 const App = () => {
