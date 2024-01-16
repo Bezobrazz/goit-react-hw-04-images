@@ -19,6 +19,7 @@ const App = () => {
   const [largeImgUrl, setLargeImgUrl] = useState('');
 
   useEffect(() => {
+    if (!search) return;
     const fetchData = async () => {
       try {
         setIsLoading(true);
